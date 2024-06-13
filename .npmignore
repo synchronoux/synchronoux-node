@@ -1,0 +1,11 @@
+
+.vscode/
+node_modules/
+src/
+lib/
+tests/
+.babelrc
+dist/
+*.tar
+*.tgz
+*.zip

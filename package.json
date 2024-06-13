@@ -1,0 +1,50 @@
+{
+  "name": "synchronoux",
+  "version": "1.0.0",
+  "description": "The Synchronoux framework for Node (Typescript, Javascript)",
+  "main": "index.js",
+  "module": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "test": "jest",
+    "build": "npx tsc",
+    "clean": "rm -Rf dist",
+    "watch": "npx npm-watch build",
+    "update": "npx -y npm-check-updates -u",
+    "pack": "bash -c 'npm run clean; npm run build; cp ./{package.json,LICENSE,README.md} dist; cd dist; npm pack'"
+  },
+  "files": [
+    "**",
+    "LICENSE",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synchronoux/synchronoux-node.git"
+  },
+  "keywords": [
+    "javascript",
+    "mysql",
+    "sync",
+    "firebase",
+    "node",
+    "typescript",
+    "sqlite",
+    "postgresql",
+    "gcp",
+    "cloudinary"
+  ],
+  "author": "Azeez Adewale",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/synchronoux/synchronoux-node/issues"
+  },
+  "homepage": "https://synchronoux.github.io/node",
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "tslib": "^2.6.3"
+  }
+}
