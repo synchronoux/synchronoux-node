@@ -45,6 +45,8 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "@google-cloud/storage": "^7.11.2",
+    "kyofuuc": "^0.0.2",
     "tslib": "^2.6.3"
   }
 }

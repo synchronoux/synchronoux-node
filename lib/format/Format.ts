@@ -5,16 +5,9 @@ export enum FormatType {
     JSON = "JSON",
 }
 
-export interface Format<T> {
+export interface Format {
 
-    getInstance(): Promise<T>;
-    toBuffer(): Promise<Buffer>;
-    toString(): Promise<string>;
-    getLogger(): Promise<Logger>;
-    transformRecordFrom<R>(format: FormatType, content: Buffer): Promise<R>;
-    constructInstance(options?: SxObject<any>, barren?: boolean): Promise<T>;
-    transformRecordsFrom<R>(format: FormatType, content: Buffer): Promise<R[]>;
-    transformRecordTo<R>(format: FormatType, record: R): Promise<SxObject<any>>;
-    transformRecordsTo<R>(format: FormatType, records: R[]): Promise<SxObject<any>[]>;
+    transformTo(record: SxObject<any>): Promise<string>;
+    transformFrom(content: string | Buffer): Promise<SxObject<any>[]>;
 
 }

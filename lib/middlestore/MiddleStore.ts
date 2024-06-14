@@ -6,13 +6,12 @@ export interface MiddleFile {
     downloadUrl?: string;
 }
 
-export interface MiddleStore<T> {
+export interface MiddleStore {
 
-    getInstance(): Promise<T>;
-    getLogger(): Promise<Logger>;
-    downloadFile(sourcePath: string): Promise<MiddleFile>;
-    constructInstance(options?: SxObject<any>, barren?: boolean): Promise<T>;
+    waitAction(params?: SxObject<any>): Promise<any>;
+    cleanup(event: "PULL" | "PUSH", params?: SxObject<any>): Promise<any>;
     uploadFile(sourcePath: string, destinationPath: string, module: string): Promise<MiddleFile>;
     uploadBytes(sourcePath: string, destinationPath: string, module: string): Promise<MiddleFile>;
+    loadFoundData(publicUrls: string[], cb: (content: string | Buffer, params?: any) => Promise<void>, params?: any): void;
 
 }

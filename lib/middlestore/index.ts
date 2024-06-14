@@ -1,3 +1,3 @@
 
-export * from "./GcpBucket";
 export * from "./MiddleStore";
+export * from "./GcpMiddleStore";

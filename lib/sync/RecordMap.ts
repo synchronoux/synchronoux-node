@@ -7,3 +7,15 @@ export interface RecordMap<R> {
     transformer: (record: R) => R;
 
 }
+
+export interface RecordTableMap<T> {
+    [key:string]: RecordMap<T>;
+}
+
+export interface SyncRecord {
+
+    pk: any;
+    model: string;
+    fields: SxObject<any>;
+
+}
