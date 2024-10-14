@@ -7,6 +7,7 @@ export enum FormatType {
 
 export interface Format {
 
+    extension(): string;
     transformTo(record: SxObject<any>): Promise<string>;
     transformFrom(content: string | Buffer): Promise<SxObject<any>[]>;
 

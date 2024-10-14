@@ -15,6 +15,10 @@ export class JsonFormat implements Format {
         return JsonFormat.instance;
     }
 
+    extension(): string {
+        return "json";
+    }
+
     transformTo(record: SxObject<any>): Promise<string> {
         return JSON.stringify(record) as any;
     }

@@ -1,4 +1,5 @@
 
+import { Model } from "sequelize";
 import { SxObject, Util } from "../util";
 import { Orm, OrmWriteMode } from "./Orm";
 import { RecordMap, RecordTableMap, SyncRecord } from "../sync";
@@ -15,7 +16,9 @@ export enum OrmEvent {
 
 export interface SequelizeOrmOption {
 
+    limitPerQuery?: number;
     writeMode?: OrmWriteMode;
+    reverseColumnMapOnRead?: boolean;
     whereFunction?: (record: SyncRecord) => SxObject<any> | boolean;
     eventListener?: (event: OrmEvent, message: string | Error, record: SyncRecord) => Promise<boolean>;
 
@@ -23,14 +26,18 @@ export interface SequelizeOrmOption {
 
 export class SequelizeOrm implements Orm {
 
+    protected limitPerQuery: number;
     protected writeMode: OrmWriteMode;
     protected static instance: SequelizeOrm;
+    protected reverseColumnMapOnRead: boolean;
     protected whereFunction?: (record: SyncRecord) => SxObject<any> | boolean;
     protected eventListener?: (event: OrmEvent, message: string | Error, record: SyncRecord) => Promise<boolean>;
 
     constructor(options?: SequelizeOrmOption) {
         this.whereFunction = options?.whereFunction;
         this.eventListener = options?.eventListener;
+        this.limitPerQuery = options?.limitPerQuery ?? 100;
+        this.reverseColumnMapOnRead = options?.reverseColumnMapOnRead ?? true;
         this.writeMode = options?.writeMode ?? OrmWriteMode.UPDATE_IF_EXISTS_ELSE_CREATE;
 
         this.broadCaseEvent = this.broadCaseEvent.bind(this);
@@ -45,16 +52,46 @@ export class SequelizeOrm implements Orm {
         return SequelizeOrm.instance;
     }
 
-    async readRecord<R>(recordMap: RecordMap<any>, options: SxObject<any>): Promise<R> {
-        throw new Error("Method not implemented.");
+    async readRecord<R>(recordMap: RecordMap<any>, cb: (table: string, r: R) => void, params?: SxObject<any>, table?: string): Promise<void> {
+        const filter = (recordMap.dataQuery 
+            ? (typeof recordMap.dataQuery === "function" ? recordMap.dataQuery() : recordMap.dataQuery)
+            : {});
+        const filterQuery = Util.mergeObjects(true, params?.dataQuery ?? {}, filter);
+        const recordsCount = await recordMap.model.count(filterQuery);
+        const maxQueryOps = Math.ceil(recordsCount / this.limitPerQuery);
+        for (let page = 0; page < maxQueryOps; page++) {
+            filterQuery.limit = this.limitPerQuery;
+            filterQuery.offset = page * this.limitPerQuery;
+            let records = await recordMap.model.findAll(filterQuery);
+            if (recordMap.transformTo) {
+                records = await recordMap.transformTo(records);
+            }
+            if (this.reverseColumnMapOnRead) {
+                const reversedColumnMap = Util.reverseObjectEntries(recordMap.columnMap);
+                records = records.map((record: any) => {
+                    let field;
+                    let fields = record;
+                    if (!!record.fields) {
+                        field = "fields";
+                        fields = record.fields;
+                    } else if (!!record.dataValues) {
+                        field = "dataValues";
+                        fields = record.dataValues;
+                    }
+                    fields = Util.columnKeyTransformer(fields, reversedColumnMap, (recordMap.reverseNameCasing ?? "SNAKE_CASE"));
+                    if (!field) return fields;
+                    record[field] = fields;
+                    return record;
+                });
+            }
+            cb(table ?? "<not-set>", records);
+        }
     }
 
-    async readRecords<R>(recordTableMap: RecordTableMap<any>, options: SxObject<any>): Promise<R[]> {
-        const result: R[] = [];
+    async readRecords<R>(recordTableMap: RecordTableMap<any>, cb: (table: string, r: R) => void, params?: SxObject<any>): Promise<void> {
         for (const key in recordTableMap) {
-            result.push(await this.readRecord(recordTableMap[key], options));
+            await this.readRecord(recordTableMap[key], cb, params, key);
         }
-        return result;
     }
 
     // TODO try catch to report error if resilient
@@ -64,9 +101,9 @@ export class SequelizeOrm implements Orm {
             this.broadCaseEvent(OrmEvent.SKIP_WRITING_RECORD, "skipping the writing the record", record);
             return 0;
         }
-        let fields = Util.columnKeyTransformer(record.fields, recordMap.columnMap);
-        if (recordMap.transformer) {
-            fields = recordMap.transformer(fields);
+        let fields = Util.columnKeyTransformer((record.fields ?? record), recordMap.columnMap, recordMap.nameCasing);
+        if (recordMap.transformFrom) {
+            fields = await recordMap.transformFrom(fields);
         }
         let whereClause: SxObject<any> = { id: record.pk };
         if (this.whereFunction) {

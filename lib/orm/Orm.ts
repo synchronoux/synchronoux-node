@@ -20,9 +20,9 @@ export enum OrmWriteMode {
 
 export interface Orm {
 
-    writeRecord(recordMap: RecordMap<any>, record: SyncRecord): Promise<number>;
-    readRecord<R>(recordMap: RecordMap<any>, options: SxObject<any>): Promise<R>;
     writeRecords(recordMap: RecordMap<any>, records: SyncRecord[]): Promise<number>;
-    readRecords<R>(recordTableMap: RecordTableMap<any>, options: SxObject<any>): Promise<R[]>;
+    writeRecord(recordMap: RecordMap<any>, record: SyncRecord, table?: string): Promise<number>;
+    readRecords<R>(recordTableMap: RecordTableMap<any>, cb: (table: string, r: R) => void, params?: SxObject<any>): Promise<void>;
+    readRecord<R>(recordMap: RecordMap<any>, cb: (table: string, r: R) => void, params?: SxObject<any>, table?: string): Promise<void>;
 
 }

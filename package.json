@@ -1,6 +1,6 @@
 {
   "name": "synchronoux",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "The Synchronoux framework for Node (Typescript, Javascript)",
   "main": "index.js",
   "module": "index.js",
@@ -11,6 +11,7 @@
     "clean": "rm -Rf dist",
     "watch": "npx npm-watch build",
     "update": "npx -y npm-check-updates -u",
+    "publish": "bash -c 'cd dist; npm publish'",
     "pack": "bash -c 'npm run clean; npm run build; cp ./{package.json,LICENSE,README.md} dist; cd dist; npm pack'"
   },
   "files": [
@@ -47,6 +48,7 @@
   "dependencies": {
     "@google-cloud/storage": "^7.11.2",
     "kyofuuc": "^0.0.2",
+    "sequelize": "^6.37.3",
     "tslib": "^2.6.3"
   }
 }

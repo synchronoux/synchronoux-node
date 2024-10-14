@@ -4,7 +4,11 @@ export interface RecordMap<R> {
 
     model: any;
     columnMap: SxObject<string>;
-    transformer: (record: R) => R;
+    dataQuery?: (() => any) | any;
+    nameCasing?: "CAMEL_CASE" | "SNAKE_CASE";
+    transformFrom: (record: R) => Promise<R>;
+    transformTo: (record: R[]) => Promise<R[]>;
+    reverseNameCasing?: "CAMEL_CASE" | "SNAKE_CASE";
 
 }
 
